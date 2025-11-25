@@ -1,5 +1,6 @@
 const upload = require('../libs/upload');
 const productModel = require('../models/products.model')
+require("dotenv").config();
 
 /**
  * GET /products
@@ -172,10 +173,14 @@ function uploadPictureProduct(req, res) {
             });
         }
 
+        const updatedProduct = productModel.getProductById(parseInt(id));
+        updatedProduct.picture = `${process.env.BASE_URL}/${req.file.filename}`;
+        console.log(updatedProduct)
+
         return res.json({
             success: true,
             message: "Picture uploaded successfully",
-            file: req.file.filename
+            data: updatedProduct
         });
     });
 }
