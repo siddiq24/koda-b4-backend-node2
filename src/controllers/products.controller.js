@@ -4,10 +4,22 @@ const productModel = require('../models/products.model')
  * GET /products
  * @summary Retrieve all products
  * @tags Products
+ * @param {string} search.query - Search term for filtering products by name
+ * @param {int} categoryId.query - Search term for filtering products by category
  * @return {object} 200 - Products retrieved successfully
  */
 function getAllProducts(req, res) {
-    const products = productModel.getAllProducts();
+    const search = req.query.search || '';
+    const categoryId = parseInt(req.query.categoryId) || '';
+    const products = productModel.getAllProducts(search, categoryId);
+
+    if (products.length === 0) {
+        return res.json({
+            success: true,
+            message: "No products found",
+            data: []
+        });
+    }
     res.json({
         success: true,
         message: "Products retrieved successfully",
@@ -45,14 +57,16 @@ function getProductsById(req, res) {
  * @example request - Example new product data
  * {
  *   "name": "Nano nano",
- *   "price": 30.50
+ *   "price": 30.50,
+ *   "description": "A new innovative product",
+ *   "categoryId": 2,
  * }
  * @return {object} 201 - Product created successfully
  * @return {object} 400 - Invalid product data
  */
 function createNewProduct(req, res) {
     const newProduct = req.body;
-    if (!newProduct.name || !newProduct.price) {
+    if (!newProduct.name || !newProduct.price || !newProduct.description || !newProduct.categoryId) {
         return res.status(400).json({
             success: false,
             message: "Invalid product data"
@@ -75,7 +89,9 @@ function createNewProduct(req, res) {
  * @example request - Example updated product data
  * {
  *  "name": "Updated Product Name",
- *  "price": 99.99
+ *  "price": 99.99,
+ *  "description": "Updated product description",
+ *  "categoryId": 1
  * }
  * @return {object} 200 - Product updated successfully
  * @return {object} 400 - Invalid product data
