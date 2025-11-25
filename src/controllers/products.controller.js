@@ -132,13 +132,18 @@ function deleteProduct(req, res) {
     });
 }
 
+/**
+ * A song
+ * @typedef {object} Upload
+ * @property {string} picture - image cover - binary
+ */
 
 /**
  * POST /products/{id}/upload
  * @summary Upload a picture for a product
  * @tags Products
  * @param {string} id.path.required - Product ID
- * @param {file} picture.multipartFormData.required - Picture file to upload
+ * @param {Upload} request.body.required - Picture file to upload - multipart/form-data
  * @return {object} 200 - Picture uploaded successfully
  */
 function uploadPictureProduct(req, res) {
