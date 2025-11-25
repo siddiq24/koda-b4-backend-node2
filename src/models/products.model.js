@@ -5,6 +5,7 @@ const products = [
         price: 20000,
         description: "Espresso-based coffee drink with steamed milk foam.",
         categoryId: 1,
+        picture: null,
         stock: 50,
     },
     {
@@ -13,6 +14,7 @@ const products = [
         price: 25000,
         description: "Espresso mixed with steamed milk and a light layer of foam.",
         categoryId: 1,
+        picture: null,
         stock: 40,
     },
     {
@@ -21,6 +23,7 @@ const products = [
         price: 15000,
         description: "Strong black coffee made by forcing steam through ground coffee beans.",
         categoryId: 1,
+        picture: null,
         stock: 60,
     },
     {
@@ -29,6 +32,7 @@ const products = [
         price: 30000,
         description: "Espresso with steamed milk and chocolate syrup.",
         categoryId: 1,
+        picture: null,
         stock: 30,
     },
     {
@@ -37,6 +41,7 @@ const products = [
         price: 40000,
         description: "Creamy dessert with a graham cracker crust.",
         categoryId: 3,
+        picture: null,
         stock: 20,
     },
     {
@@ -45,7 +50,17 @@ const products = [
         price: 35000,
         description: "Chocolate baked dessert square.",
         categoryId: 3,
+        picture: null,
         stock: 25,
+    },
+    {
+        id: 7,
+        name: "Tiramisu",
+        price: 45000,
+        description: "Coffee-flavored Italian dessert made of layers of sponge cake and mascarpone cheese.",
+        categoryId: 3,
+        picture: null,
+        stock: 15,
     }
 ];
 
@@ -88,5 +103,14 @@ module.exports = {
             products.splice(index, 1);
         }
     },
+
+    uploadPictureProduct: (id, picture) => {
+        const product = products.find(product => product.id === parseInt(id));
+        if (product) {
+            product.picture = picture.path;
+            return product;
+        }
+        return null;
+    }
 
 };
