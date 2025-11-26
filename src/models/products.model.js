@@ -4,16 +4,11 @@ module.exports = {
     getAllProducts: async (search, catId) => {
         const products = await prisma.product.findMany({
             where: {
-                AND: [
-                    search
-                        ? { name: { contains: search, mode: 'insensitive' } }
-                        : {},
-                    catId
-                        ? { categoryId: Number(catId) }
-                        : {}
-                ]
-            }
+                name: search ? { contains: search } : {},
+                categoryId: catId ? Number(catId) : undefined
+            },
         });
+        console.log(products)
 
         return products;
     },

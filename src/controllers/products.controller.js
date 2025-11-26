@@ -10,10 +10,10 @@ require("dotenv").config();
  * @param {int} categoryId.query - Search term for filtering products by category
  * @return {object} 200 - Products retrieved successfully
  */
-function getAllProducts(req, res) {
+async function getAllProducts(req, res) {
     const search = req.query.search || '';
     const categoryId = parseInt(req.query.categoryId) || '';
-    const products = productModel.getAllProducts(search, categoryId);
+    const products = await productModel.getAllProducts(search, categoryId);
 
     if (products.length === 0) {
         return res.json({
@@ -37,10 +37,10 @@ function getAllProducts(req, res) {
  * @param {string} id.path.required - Product ID
  * @return {object} 200 - Product retrieved successfully
  */
-function getProductsById(req, res) {
+async function getProductsById(req, res) {
     const productId = req.params.id;
     console.log(productId)
-    const product = productModel.getProductById(productId);
+    const product = await productModel.getProductById(productId);
     if (!product) {
         return res.status(404).json({ message: "Product not found" });
     }
