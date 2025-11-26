@@ -1,6 +1,7 @@
 const userModel = require('../models/user.model');
 const { validationResult } = require('express-validator');
 const { hashPassword, comparePassword } = require('../libs/hashPassword');
+const jwt = require('jsonwebtoken');
 
 /**
  * POST /auth/register
@@ -70,31 +71,34 @@ async function register(req, res) {
  * @return {object} 401 - Invalid email or password
  */
 async function login(req, res) {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
     const { email, password } = req.body;
 
     const user = await userModel.findUserByEmail(email);
     if (!user) {
-        return res.status(400).json({ message: 'Email tidak ditemukan' });
-    }
-
-    const isPasswordValid = await comparePassword(password, user.password);
-
-    if (!isPasswordValid) {
-        return res.status(401).json({
+        return res.status(400).json({
             success: false,
             message: "Invalid email or password"
         });
     }
 
+    const isPasswordValid = await comparePassword(password, user.password);
+    if (!isPasswordValid) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid email or password"
+        });
+    }
+
+    const token = jwt.sign(
+        { id: user.id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+    );
+
     res.json({
         success: true,
         message: "Login successful",
+        token: `Bearer ${token}`,
         data: { id: user.id, email: user.email }
     });
 }
