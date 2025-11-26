@@ -1,4 +1,5 @@
-const authModel = require('../models/user.model');
+const userModel = require('../models/user.model');
+const { validationResult } = require('express-validator');
 
 /**
  * POST /auth/register
@@ -13,23 +14,37 @@ const authModel = require('../models/user.model');
  * @return {object} 201 - User registered successfully
  * @return {object} 400 - Email already exists
  */
-function register(req, res) {
-    const userData = req.body;
-    const existing = authModel.findUserByEmail(userData.email);
-    if (existing) {
+async function register(req, res) {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
         return res.status(400).json({
             success: false,
-            message: "Email already exists"
+            message: "Invalid input",
+            errors: errors.array()
         });
     }
 
-    const newUser = authModel.register(userData);
+    try {
+        const { email, password } = req.body;
 
-    res.status(201).json({
-        success: true,
-        message: "User registered successfully",
-        data: newUser
-    });
+        const existing = await userModel.findUserByEmail(email);
+        if (existing) {
+            return res.status(400).json({
+                success: false,
+                message: "Email already exists"
+            });
+        }
+
+        const newUser = await userModel.register({ email, password });
+        res.status(201).json({
+            success: true,
+            message: "User registered successfully",
+            data: newUser
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 }
 
 /**
@@ -45,11 +60,22 @@ function register(req, res) {
  * @return {object} 200 - User logged in successfully
  * @return {object} 401 - Invalid email or password
  */
-function login(req, res) {
+async function login(req, res) {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { email, password } = req.body;
 
-    const user = authModel.findUserByEmail(email);
-    if (!user || user.password !== password) {
+    const user = await userModel.findUserByEmail(email);
+    if (!user) {
+        return res.status(400).json({ message: 'Email tidak ditemukan' });
+    }
+
+    if (user.password !== password) {
+
         return res.status(401).json({
             success: false,
             message: "Invalid email or password"

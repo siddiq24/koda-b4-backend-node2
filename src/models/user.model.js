@@ -1,19 +1,20 @@
-const users = [
-    { id: 1, email: 'sidik@email.com', password: 'password123' },
-];
+const prisma = require('../libs/prisma');
 
 module.exports = {
-    register: (userData) => {
-        const newUser = {
-            id: users.length + 1,
-            email: userData.email,
-            password: userData.password,
-        };
-        users.push(newUser);
+    register: async (userData) => {
+        const newUser = await prisma.user.create({
+            data: {
+                email: userData.email,
+                password: userData.password,
+            }
+        });
+
         return newUser;
     },
 
-    findUserByEmail: (email) => {
-        return users.find(u => u.email === email);
+    findUserByEmail: async (email) => {
+        return await prisma.user.findUnique({
+            where: { email }
+        });
     }
 };
