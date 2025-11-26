@@ -1,5 +1,6 @@
 const userModel = require('../models/user.model');
 const { validationResult } = require('express-validator');
+const { hashPassword, comparePassword } = require('../libs/hashPassword');
 
 /**
  * POST /auth/register
@@ -18,6 +19,7 @@ async function register(req, res) {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
+        console.log(errors.array());
         return res.status(400).json({
             success: false,
             message: "Invalid input",
@@ -28,6 +30,8 @@ async function register(req, res) {
     try {
         const { email, password } = req.body;
 
+        const hashedPassword = await hashPassword(password);
+
         const existing = await userModel.findUserByEmail(email);
         if (existing) {
             return res.status(400).json({
@@ -36,7 +40,11 @@ async function register(req, res) {
             });
         }
 
-        const newUser = await userModel.register({ email, password });
+        const newUser = await userModel.register({
+            email,
+            password: hashedPassword
+        });
+
         res.status(201).json({
             success: true,
             message: "User registered successfully",
@@ -46,6 +54,7 @@ async function register(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
+
 
 /**
  * POST /auth/login
@@ -74,8 +83,9 @@ async function login(req, res) {
         return res.status(400).json({ message: 'Email tidak ditemukan' });
     }
 
-    if (user.password !== password) {
+    const isPasswordValid = await comparePassword(password, user.password);
 
+    if (!isPasswordValid) {
         return res.status(401).json({
             success: false,
             message: "Invalid email or password"
