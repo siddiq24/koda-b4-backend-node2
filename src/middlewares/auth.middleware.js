@@ -10,7 +10,16 @@ module.exports = function authenticate(req, res, next) {
         });
     }
 
-    const token = authHeader.split(" ")[1];
+    const prefix = "Bearer ";
+
+    if (!authHeader.startsWith(prefix)) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid prefix"
+        });
+    }
+
+    const token = authHeader.slice(prefix.length).trim();
     if (!token) {
         return res.status(401).json({
             success: false,
